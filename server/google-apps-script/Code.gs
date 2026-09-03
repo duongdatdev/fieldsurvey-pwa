@@ -15,6 +15,22 @@
  * 10. Paste the URL into FieldSurvey PWA -> Config / Settings.
  */
 
+/**
+ * =========================================================================
+ * BẤM NÚT CHẠY HÀM NÀY ĐỂ CẤP QUYỀN GOOGLE DRIVE (1 LẦN DUY NHẤT):
+ * 1. Chọn hàm "TEST_AUTHORIZE_DRIVE" ở ô bên cạnh nút "Chạy" (Run) ▶️
+ * 2. Bấm "Chạy" (Run) ▶️ -> Bấm "Xem xét quyền" -> Cho phép (Allow)!
+ * =========================================================================
+ */
+function TEST_AUTHORIZE_DRIVE() {
+  var folderName = 'FieldSurvey Uploads';
+  var folders = DriveApp.getFoldersByName(folderName);
+  var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+  folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  Logger.log('CẤP QUYỀN DRIVE THÀNH CÔNG! Thư mục URL: ' + folder.getUrl());
+  return folder.getUrl();
+}
+
 // Configuration
 const SHEET_NAMES = {
   SURVEYS: 'Surveys',

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Survey, Question } from '../../types/survey';
 import { QuestionRenderer } from '../questions/QuestionRenderer';
-import { ArrowLeft, ArrowRight, Save, Send, Eye } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Send, Eye, Check } from 'lucide-react';
 
 interface DynamicSurveyFormProps {
   survey: Survey;
   questions: Question[];
   initialAnswers?: Record<string, any>;
   initialStep?: number;
-  onSaveDraft: (answers: Record<string, any>, currentStep: number) => void;
+  onSaveDraft: (answers: Record<string, any>, currentStep: number) => void | Promise<void>;
   onSubmit: (answers: Record<string, any>) => void;
   onCancel?: () => void;
   isSubmitting?: boolean;
@@ -28,11 +28,32 @@ export const DynamicSurveyForm: React.FC<DynamicSurveyFormProps> = ({
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const debounceTimerRef = useRef<any>(null);
 
   // Sort questions by order
   const sortedQuestions = [...questions].sort((a, b) => a.order - b.order);
   const totalQuestions = sortedQuestions.length;
   const currentQuestion = sortedQuestions[currentStep];
+
+  // Real-time persistence into IndexedDB on any answer or step change (prevents data loss on F5)
+  useEffect(() => {
+    if (Object.keys(answers).length > 0 || currentStep > 0) {
+      setSaveStatus('saving');
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(async () => {
+        try {
+          await onSaveDraft(answers, currentStep);
+          setSaveStatus('saved');
+        } catch {
+          setSaveStatus('idle');
+        }
+      }, 400);
+    }
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [answers, currentStep, onSaveDraft]);
 
   const handleAnswerChange = (questionId: string, val: any) => {
     const updated = { ...answers, [questionId]: val };
@@ -101,8 +122,10 @@ export const DynamicSurveyForm: React.FC<DynamicSurveyFormProps> = ({
     onSubmit(answers);
   };
 
-  const handleManualDraftSave = () => {
-    onSaveDraft(answers, currentStep);
+  const handleManualDraftSave = async () => {
+    setSaveStatus('saving');
+    await onSaveDraft(answers, currentStep);
+    setSaveStatus('saved');
   };
 
   const progressPercentage = totalQuestions > 0 
@@ -115,9 +138,19 @@ export const DynamicSurveyForm: React.FC<DynamicSurveyFormProps> = ({
       <div className="card" style={{ padding: '14px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
           <div>
-            <span className="badge" style={{ backgroundColor: 'var(--accent-primary-soft)', color: 'var(--accent-primary)' }}>
-              {survey.topic}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span className="badge" style={{ backgroundColor: 'var(--accent-primary-soft)', color: 'var(--accent-primary)' }}>
+                {survey.topic}
+              </span>
+              {saveStatus === 'saved' && (
+                <span className="badge badge-synced" style={{ fontSize: '0.7rem', padding: '2px 8px' }}>
+                  <Check size={11} /> Auto-saved locally
+                </span>
+              )}
+              {saveStatus === 'saving' && (
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Saving...</span>
+              )}
+            </div>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginTop: '4px', color: 'var(--text-main)' }}>
               {survey.title}
             </h2>

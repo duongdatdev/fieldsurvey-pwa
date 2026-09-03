@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Survey, Question } from '../types/survey';
 import { surveyRepository } from '../db/repositories/surveyRepository';
 import { useSurveyDraft } from '../hooks/useSurveyDraft';
@@ -31,6 +31,8 @@ export const SurveyFillPage: React.FC<SurveyFillPageProps> = ({
     responseId: string;
   } | null>(null);
 
+  const hasCheckedDraftRef = useRef(false);
+
   const { isOnline, triggerSync, refreshCounts } = useSync();
   const { draft, hasDraft, loadingDraft, saveDraft, clearDraft } = useSurveyDraft(surveyId);
 
@@ -52,10 +54,15 @@ export const SurveyFillPage: React.FC<SurveyFillPageProps> = ({
     load();
   }, [surveyId]);
 
-  // If draft exists, show resume dialog
+  // If draft exists, show resume dialog ONLY on initial load
   useEffect(() => {
-    if (!loadingDraft && hasDraft && draft) {
-      setShowDraftModal(true);
+    if (!loadingDraft) {
+      if (!hasCheckedDraftRef.current) {
+        hasCheckedDraftRef.current = true;
+        if (hasDraft && draft && draft.answers && Object.keys(draft.answers).length > 0) {
+          setShowDraftModal(true);
+        }
+      }
     }
   }, [loadingDraft, hasDraft, draft]);
 
@@ -76,7 +83,6 @@ export const SurveyFillPage: React.FC<SurveyFillPageProps> = ({
 
   const handleSaveDraft = async (answers: Record<string, any>, currentStep: number) => {
     await saveDraft(answers, currentStep);
-    alert('Draft saved to device! You can safely close or exit.');
   };
 
   const handleSubmit = async (answers: Record<string, any>) => {

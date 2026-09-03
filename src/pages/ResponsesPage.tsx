@@ -133,7 +133,7 @@ export const ResponsesPage: React.FC = () => {
         return (
           <span className="badge badge-pending">
             <Clock size={12} />
-            <span>{status === 'syncing' ? 'Syncing...' : 'Pending'}</span>
+            <span>{status === 'syncing' ? 'Syncing...' : 'PENDING_SYNC'}</span>
           </span>
         );
       case 'failed':
@@ -194,7 +194,7 @@ export const ResponsesPage: React.FC = () => {
           </div>
           <div style={{ padding: '8px 4px', backgroundColor: 'var(--status-pending-bg)', color: '#92400e', borderRadius: 'var(--radius-md)' }}>
             <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{counts.pending}</div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700 }}>PENDING</div>
+            <div style={{ fontSize: '0.64rem', fontWeight: 700 }}>PENDING_SYNC</div>
           </div>
           <div style={{ padding: '8px 4px', backgroundColor: 'var(--status-offline-bg)', color: '#9f1239', borderRadius: 'var(--radius-md)' }}>
             <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>{counts.failed}</div>
@@ -210,9 +210,9 @@ export const ResponsesPage: React.FC = () => {
             key={st}
             onClick={() => setFilterStatus(st)}
             className={`btn btn-sm ${filterStatus === st ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ textTransform: 'capitalize', fontSize: '0.78rem' }}
+            style={{ textTransform: 'capitalize', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
           >
-            {st} {st !== 'all' && `(${counts[st as keyof typeof counts]})`}
+            {st === 'pending' ? 'Pending Sync' : st} {st !== 'all' && `(${counts[st as keyof typeof counts]})`}
           </button>
         ))}
       </div>

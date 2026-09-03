@@ -108,18 +108,19 @@ export async function getDB(): Promise<IDBPDatabase<FieldSurveyDB>> {
       console.info('[IndexedDB] Seeded demo surveys and questions into field-survey-db');
     } else {
       // Ensure campus facility survey questions match latest VKU requirements
-      const checkQ = await db.get('questions', 'q-fac-2');
-      if (!checkQ || checkQ.question !== 'Floor') {
-        const tx = db.transaction(['questions'], 'readwrite');
-        const qStore = tx.objectStore('questions');
-        for (const question of SEED_QUESTIONS) {
-          if (question.surveyId === 'survey-campus-facility-inspection') {
-            await qStore.put(question);
-          }
-        }
-        await tx.done;
-        console.info('[IndexedDB] Synchronized VKU Campus Facility questions');
+      const tx = db.transaction(['surveys', 'questions'], 'readwrite');
+      const sStore = tx.objectStore('surveys');
+      for (const survey of SEED_SURVEYS) {
+        await sStore.put(survey);
       }
+      const qStore = tx.objectStore('questions');
+      for (const question of SEED_QUESTIONS) {
+        if (question.surveyId === 'survey-campus-facility-inspection') {
+          await qStore.put(question);
+        }
+      }
+      await tx.done;
+      console.info('[IndexedDB] Synchronized VKU Campus Facility surveys and questions');
     }
   }
 

@@ -2,6 +2,15 @@ import { Survey, Question } from '../types/survey';
 
 export const SEED_SURVEYS: Survey[] = [
   {
+    id: 'survey-campus-facility-inspection',
+    title: 'VKU Campus Facility & Infrastructure Inspection',
+    description: 'Official VKU field inspection and condition audit for lecture halls, tech labs, electrical facilities, and student spaces.',
+    topic: 'VKU Campus Inspection',
+    status: 'active',
+    createdAt: new Date('2026-03-01T09:00:00Z').toISOString(),
+    updatedAt: new Date('2026-03-01T09:00:00Z').toISOString(),
+  },
+  {
     id: 'survey-danang-student-lifestyle',
     title: 'Da Nang Student Lifestyle Survey',
     description: 'Comprehensive research on living conditions, transit, expenditure, and campus satisfaction across Da Nang universities.',
@@ -9,15 +18,6 @@ export const SEED_SURVEYS: Survey[] = [
     status: 'active',
     createdAt: new Date('2026-03-01T08:00:00Z').toISOString(),
     updatedAt: new Date('2026-03-01T08:00:00Z').toISOString(),
-  },
-  {
-    id: 'survey-campus-facility-inspection',
-    title: 'Campus Facility & Infrastructure Inspection',
-    description: 'Field inspection and condition audit for university lecture halls, computer labs, electrical facilities, and student spaces.',
-    topic: 'Facility Inspection & Audit',
-    status: 'active',
-    createdAt: new Date('2026-03-01T09:00:00Z').toISOString(),
-    updatedAt: new Date('2026-03-01T09:00:00Z').toISOString(),
   },
 ];
 

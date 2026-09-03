@@ -1,14 +1,14 @@
 # MINI-PROJECT SHORT TECHNICAL REPORT
 **Course:** Cross-Platform Mobile App Development (VKU)  
 **Mini-Project Title:** Mini-Project 1: VKU Field Survey — Offline Data Collection (PWA & Capacitor)  
-**Student / Team Name:** Duong Dat (duongdatdev)  
+**Student / Team Name:** Dương Bảo Đạt   
 **Submission Date:** 03/09/2026  
 
 ---
 
 ## 1. GENERAL INFORMATION & DELIVERABLE LINKS
 * **Team Members:**
-  1. Dương Đạt — GitHub: `@duongdatdev` — Role: Full-Stack Architecture, PWA, Capacitor Native & Cloud Integration — Contribution: 100%
+  1. Dương Bảo Đạt — GitHub: `@duongdatdev` — Role: Full-Stack Architecture, PWA, Capacitor Native & Cloud Integration — Contribution: 100%
 * **🌐 Live Demo URL:** [https://fieldsurvey-pwa.pages.dev](https://fieldsurvey-pwa.pages.dev) *(HTTPS mandatory, deployed via Cloudflare Pages)*
 * **💻 GitHub Repository:** [https://github.com/duongdatdev/fieldsurvey-pwa](https://github.com/duongdatdev/fieldsurvey-pwa)
 * **📱 Android APK Binary:** Located at `android/app/build/outputs/apk/debug/app-debug.apk` (Size: 8.26 MB)

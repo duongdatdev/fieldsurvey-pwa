@@ -118,6 +118,37 @@ function doPost(e) {
 }
 
 /**
+ * Save Base64 Photo to Google Drive in "FieldSurvey Uploads" folder.
+ * Returns public shareable URL.
+ */
+function saveBase64ImageToDrive(base64Data, fileName) {
+  try {
+    var parts = base64Data.split(',');
+    var contentType = 'image/jpeg';
+    var rawBase64 = parts[0];
+    if (parts.length > 1) {
+      var match = parts[0].match(/:(.*?);/);
+      if (match) contentType = match[1];
+      rawBase64 = parts[1];
+    }
+
+    var decoded = Utilities.base64Decode(rawBase64);
+    var blob = Utilities.newBlob(decoded, contentType, fileName);
+
+    var folderName = 'FieldSurvey Uploads';
+    var folders = DriveApp.getFoldersByName(folderName);
+    var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return file.getUrl();
+  } catch (err) {
+    Logger.log('Drive upload notice: ' + err.toString());
+    return null;
+  }
+}
+
+/**
  * Record a survey response with IDEMPOTENCY check (UUID deduplication).
  */
 function recordSurveyResponse(response) {
@@ -150,21 +181,37 @@ function recordSurveyResponse(response) {
     }
   }
 
-  // 2. Prepare row values
+  // 2. Prepare row values & Process Photos for Google Drive / Sheets
   const nowStr = new Date().toISOString();
-  const answersJson = JSON.stringify(response.answers || {});
-  
-  // Create readable summary of answers
-  const answersObj = response.answers || {};
+  const rawAnswers = response.answers || {};
+  const processedAnswers = {};
+  const photoUrls = [];
   const summaryParts = [];
-  for (const k in answersObj) {
-    if (typeof answersObj[k] === 'string' && answersObj[k].startsWith('data:image')) {
-      summaryParts.push(k + ': [Photo attached]');
+
+  for (const k in rawAnswers) {
+    const val = rawAnswers[k];
+    if (typeof val === 'string' && val.indexOf('data:image') === 0) {
+      // Photo detected: save to Google Drive folder "FieldSurvey Uploads"
+      const driveUrl = saveBase64ImageToDrive(val, responseId + '_' + k + '.jpg');
+      if (driveUrl) {
+        processedAnswers[k] = driveUrl;
+        photoUrls.push(driveUrl);
+        summaryParts.push(k + ': [Drive Photo: ' + driveUrl + ']');
+      } else {
+        // Fallback label to guarantee cell character limit < 50000
+        const photoLabel = '[Photo: ' + Math.round(val.length / 1024) + ' KB image captured]';
+        processedAnswers[k] = photoLabel;
+        summaryParts.push(k + ': ' + photoLabel);
+      }
     } else {
-      summaryParts.push(k + ': ' + JSON.stringify(answersObj[k]));
+      processedAnswers[k] = val;
+      summaryParts.push(k + ': ' + JSON.stringify(val));
     }
   }
+
+  const answersJson = JSON.stringify(processedAnswers);
   const summaryText = summaryParts.join(' | ');
+  const photoUrlsText = photoUrls.join(', ');
 
   // Append new row
   respSheet.appendRow([
@@ -174,7 +221,8 @@ function recordSurveyResponse(response) {
     nowStr, // remote received timestamp
     nowStr, // syncedAt
     answersJson,
-    summaryText
+    summaryText,
+    photoUrlsText
   ]);
 
   return {
@@ -287,7 +335,7 @@ function initDatabaseIfMissing() {
   let rSheet = ss.getSheetByName(SHEET_NAMES.RESPONSES);
   if (!rSheet) {
     rSheet = ss.insertSheet(SHEET_NAMES.RESPONSES);
-    rSheet.appendRow(['responseId', 'surveyId', 'createdAt', 'receivedAt', 'syncedAt', 'answersJson', 'summaryAnswers']);
+    rSheet.appendRow(['responseId', 'surveyId', 'createdAt', 'receivedAt', 'syncedAt', 'answersJson', 'summaryAnswers', 'photoUrls']);
     formatHeaderRow(rSheet);
   }
 }

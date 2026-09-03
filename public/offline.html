@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline | FieldSurvey PWA</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(244, 63, 94, 0.2);
+      color: #f43f5e;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin: 0 0 12px 0;
+    }
+    p {
+      color: #94a3b8;
+      line-height: 1.6;
+      max-width: 440px;
+      margin: 0 0 24px 0;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 440px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1rem;
+      color: #14b8a6;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #0f766e;
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="badge">OFFLINE EMERGENCY FALLBACK</div>
+  <h1>Working In The Field</h1>
+  <p>Your device is currently disconnected from the Internet. FieldSurvey PWA is equipped with local-first offline storage.</p>
+  
+  <div class="card">
+    <h3>Data Is Safe Locally</h3>
+    <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">
+      All survey forms and recorded observations are stored directly in your device's IndexedDB database. Once connection is restored, submissions will automatically synchronize to Google Sheets.
+    </p>
+  </div>
+
+  <button class="btn" onclick="window.location.reload()">Reload Application</button>
+</body>
+</html>

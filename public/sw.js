@@ -35,6 +35,7 @@ const APP_SHELL_ASSETS = [
   '/icons/icon.svg',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  /* __BUILD_ASSETS__ */
 ];
 
 // ============================================================================
@@ -47,7 +48,55 @@ self.addEventListener('install', (event) => {
     (async () => {
       // Pre-cache App Shell
       const shellCache = await caches.open(CACHE_NAME_APP_SHELL);
-      await shellCache.addAll(APP_SHELL_ASSETS);
+      const validAssets = APP_SHELL_ASSETS.filter(
+        (url) => typeof url === 'string' && url.trim().length > 0 && !url.includes('__BUILD_ASSETS__')
+      );
+      await shellCache.addAll(validAssets);
+
+      // Auto-discover any active bundled scripts/styles from /index.html
+      try {
+        const indexResponse = await fetch('/index.html');
+        if (indexResponse.ok) {
+          const html = await indexResponse.text();
+          const discoveredAssets = [];
+
+          // Match script tags
+          const scriptRegex = /<script\b[^>]*src=["']([^"']+)["'][^>]*>/gi;
+          let match;
+          while ((match = scriptRegex.exec(html)) !== null) {
+            const src = match[1];
+            if (src && !src.startsWith('http') && !src.startsWith('//')) {
+              discoveredAssets.push(src);
+            }
+          }
+
+          // Match stylesheet tags
+          const styleRegex = /<link\b[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi;
+          while ((match = styleRegex.exec(html)) !== null) {
+            const href = match[1];
+            if (href && !href.startsWith('http') && !href.startsWith('//')) {
+              discoveredAssets.push(href);
+            }
+          }
+
+          // Match modulepreload tags
+          const preloadRegex = /<link\b[^>]*rel=["']modulepreload["'][^>]*href=["']([^"']+)["'][^>]*>/gi;
+          while ((match = preloadRegex.exec(html)) !== null) {
+            const href = match[1];
+            if (href && !href.startsWith('http') && !href.startsWith('//')) {
+              discoveredAssets.push(href);
+            }
+          }
+
+          const uniqueDiscovered = [...new Set(discoveredAssets)];
+          if (uniqueDiscovered.length > 0) {
+            console.log('[ServiceWorker] Pre-caching auto-discovered assets:', uniqueDiscovered);
+            await shellCache.addAll(uniqueDiscovered);
+          }
+        }
+      } catch (err) {
+        console.warn('[ServiceWorker] Note: Dynamic index.html asset discovery notice:', err);
+      }
 
       // Pre-cache Offline Fallback (Cache-Only resource)
       const offlineCache = await caches.open(CACHE_NAME_OFFLINE);
@@ -187,9 +236,17 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
       // 1. Check App Shell cache
-      const cached = await caches.match(req);
+      const cached = await caches.match(req, { ignoreSearch: req.mode === 'navigate' });
       if (cached) {
         return cached;
+      }
+
+      // If user navigates while offline, immediately serve cached SPA App Shell
+      if (req.mode === 'navigate' && !navigator.onLine) {
+        const appShell = (await caches.match('/index.html')) || (await caches.match('/'));
+        if (appShell) {
+          return appShell;
+        }
       }
 
       // 2. Fetch from network and dynamically cache valid GET responses
@@ -199,15 +256,24 @@ self.addEventListener('fetch', (event) => {
           networkResponse &&
           networkResponse.status === 200 &&
           req.method === 'GET' &&
-          (url.origin === self.location.origin || url.hostname.includes('fonts.gstatic.com'))
+          (
+            url.origin === self.location.origin ||
+            url.hostname.includes('fonts.gstatic.com') ||
+            url.hostname.includes('fonts.googleapis.com')
+          )
         ) {
           const shellCache = await caches.open(CACHE_NAME_APP_SHELL);
           shellCache.put(req, networkResponse.clone());
         }
         return networkResponse;
       } catch (err) {
-        // If navigation request fails and no cache, serve offline fallback
+        // If navigation request fails (e.g. device went offline), serve SPA App Shell
         if (req.mode === 'navigate') {
+          const appShell = (await caches.match('/index.html')) || (await caches.match('/'));
+          if (appShell) {
+            return appShell;
+          }
+          // Ultimate emergency fallback if App Shell is not cached
           const offlinePage = await caches.match('/offline.html');
           if (offlinePage) {
             return offlinePage;

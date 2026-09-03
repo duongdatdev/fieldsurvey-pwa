@@ -55,15 +55,35 @@
       color: #14b8a6;
     }
     .btn {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 12px 24px;
       background: #0f766e;
       color: white;
       text-decoration: none;
       border-radius: 12px;
       font-weight: 700;
+      font-size: 0.95rem;
       cursor: pointer;
       border: none;
+      transition: background 0.2s ease;
+    }
+    .btn:hover {
+      background: #0d9488;
+    }
+    .btn-secondary {
+      background: #334155;
+      color: #f1f5f9;
+    }
+    .btn-secondary:hover {
+      background: #475569;
+    }
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
   </style>
 </head>
@@ -79,6 +99,9 @@
     </p>
   </div>
 
-  <button class="btn" onclick="window.location.reload()">Reload Application</button>
+  <div class="btn-group">
+    <a class="btn" href="/">Open Field App</a>
+    <button class="btn btn-secondary" onclick="window.location.reload()">Reload</button>
+  </div>
 </body>
 </html>

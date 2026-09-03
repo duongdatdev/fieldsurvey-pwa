@@ -8,11 +8,10 @@
 
 ## 1. GENERAL INFORMATION & DELIVERABLE LINKS
 * **Team Members:**
-  1. Dương Bảo Đạt — Student ID: [22ITxxx] — Role: Full-Stack Architecture, PWA, Capacitor Native & Cloud Integration — Contribution: [100%]
-  2. [Student Full Name] — Student ID: [22ITyyy] — Role: [Member / Logic & State Management] — Contribution: [0%]
+  1. Dương Bảo Đạt — Student ID: [23IT046] — Role: Full-Stack Architecture, PWA, Capacitor Native & Cloud Integration — Contribution: [100%]
 * **🔗 Live Demo URL:** https://fieldsurvey-pwa.pages.dev
 * **💻 GitHub Repository:** https://github.com/duongdatdev/fieldsurvey-pwa
-* **🎥 Video Demo (Optional):** [https://youtu.be/xxx]
+* **🎥 Link APK:** [https://github.com/duongdatdev/fieldsurvey-pwa/releases]
 
 ---
 

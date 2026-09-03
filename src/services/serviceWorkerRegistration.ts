@@ -4,7 +4,7 @@
 
 export function registerServiceWorker(onUpdate?: (registration: ServiceWorkerRegistration) => void) {
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
+    const register = async () => {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js', {
           scope: '/',
@@ -27,7 +27,13 @@ export function registerServiceWorker(onUpdate?: (registration: ServiceWorkerReg
       } catch (error) {
         console.error('[PWA] Service Worker registration failed:', error);
       }
-    });
+    };
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      register();
+    } else {
+      window.addEventListener('load', register);
+    }
   }
 }
 

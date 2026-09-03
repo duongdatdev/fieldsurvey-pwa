@@ -41,12 +41,39 @@ function doGet(e) {
       });
     }
 
-    if (action === 'getSurveys') {
-      const surveys = fetchAllSurveys();
-      return createJsonResponse({
-        success: true,
-        surveys: surveys,
-      });
+    if (action === 'checkDriveUploads') {
+      try {
+        var folderName = 'FieldSurvey Uploads';
+        var folders = DriveApp.getFoldersByName(folderName);
+        if (!folders.hasNext()) {
+          return createJsonResponse({ success: true, folderExists: false, files: [], message: 'Folder not created yet' });
+        }
+        var folder = folders.next();
+        var files = folder.getFiles();
+        var fileList = [];
+        while (files.hasNext()) {
+          var f = files.next();
+          fileList.push({
+            name: f.getName(),
+            url: f.getUrl(),
+            sizeBytes: f.getSize(),
+            dateCreated: f.getDateCreated()
+          });
+        }
+        return createJsonResponse({ success: true, folderExists: true, files: fileList });
+      } catch (err) {
+        return createJsonResponse({ success: false, error: 'Drive error: ' + err.toString() });
+      }
+    }
+
+    if (action === 'getRecentResponses') {
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      const rSheet = ss.getSheetByName(SHEET_NAMES.RESPONSES);
+      if (!rSheet) return createJsonResponse({ success: true, rows: [] });
+      const lastRow = rSheet.getLastRow();
+      if (lastRow <= 1) return createJsonResponse({ success: true, rows: [] });
+      const data = rSheet.getRange(Math.max(2, lastRow - 5), 1, Math.min(6, lastRow - 1), rSheet.getLastColumn()).getValues();
+      return createJsonResponse({ success: true, rows: data });
     }
 
     return createJsonResponse({

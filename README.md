@@ -3,6 +3,7 @@
 > **Offline-First Field Survey & Social Research Platform**  
 > *University Final Project — Advanced Progressive Web Applications & Cloud Architecture*
 
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717.svg?logo=github)](https://github.com/duongdatdev/fieldsurvey-pwa)
 [![Live Cloudflare Pages](https://img.shields.io/badge/Live%20Demo-fieldsurvey--pwa.pages.dev-0284c7.svg)](https://fieldsurvey-pwa.pages.dev)
 [![PWA Ready](https://img.shields.io/badge/PWA-Ready-0284c7.svg)](#pwa-architecture)
 [![Offline First](https://img.shields.io/badge/Offline-IndexedDB-14b8a6.svg)](#indexeddb-architecture)

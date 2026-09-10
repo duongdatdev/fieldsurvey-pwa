@@ -235,6 +235,10 @@ export const DynamicSurveyForm: React.FC<DynamicSurveyFormProps> = ({
                         <img src={val} alt="Attached thumbnail" style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover' }} />
                         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>[Photo Attached]</span>
                       </div>
+                    ) : q.type === 'location' && val ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', fontSize: '0.85rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                        <span>📍 GPS: {val.latitude}, {val.longitude} {val.accuracy ? `(±${val.accuracy}m)` : ''}</span>
+                      </div>
                     ) : Array.isArray(val) ? (
                       val.join(', ') || 'No options selected'
                     ) : (

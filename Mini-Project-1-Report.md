@@ -1,4 +1,4 @@
-﻿# MINI-PROJECT SHORT TECHNICAL REPORT
+# MINI-PROJECT SHORT TECHNICAL REPORT
 **Course:** Cross-Platform Mobile App Development (VKU)
 **Mini-Project Title:** Mini-Project 1: VKU Field Survey — Offline Data Collection (PWA & Capacitor)
 **Team / Student Name:** Dương Bảo Đạt
@@ -21,7 +21,7 @@
 | 1 | PWA Standalone Installation | ✅ Complete | Valid `manifest.json` configured with `display: standalone`, theme color `#0284c7`, background `#0f172a`, responsive icons (192x192, 512x512). Service Worker (`sw.js`) caches App Shell assets using a Cache-First strategy for sub-second offline boot. |
 | 2 | Offline Form & Local Draft Persistence | ✅ Complete | Multi-step inspection form with 7 VKU fields (Building, Floor, Room #, Category, 1-5 Star Rating, Defect Notes, Camera Photo Evidence). Real-time persistence into IndexedDB (`drafts`) via `idb` on every input change (debounced 400ms) to prevent data loss on browser refresh. |
 | 3 | Offline Queue & Background Sync | ✅ Complete | Offline submissions are stamped with UUIDv4, ISO timestamp, and saved as `PENDING_SYNC` in IndexedDB store `syncQueue`. Listens to `window.ononline`, Capacitor Network status, and Background Sync API to automatically dispatch queued surveys sequentially upon network restoration to Google Sheets. |
-| 4 | Capacitor Native APK Compilation | ✅ Complete | Integrated `@capacitor/camera` for native photo capture and `@capacitor/network` for real-time status monitoring. Packaged and verified as an installable Android APK (`com.vku.fieldsurvey`, binary at `android/app/build/outputs/apk/debug/app-debug.apk`). |
+| 4 | Capacitor Native APK & Hardware Plugins | ✅ Complete | Integrated `@capacitor/camera` for native photo capture, `@capacitor/geolocation` for device GPS coordinates capture, `@capacitor/local-notifications` for sync-success push alerts, and `@capacitor/network` for connection monitoring. Packaged and verified as an installable Android APK (`com.vku.fieldsurvey`, binary at `android/app/build/outputs/apk/debug/app-debug.apk`). |
 
 ---
 
@@ -44,14 +44,17 @@ survey-pwa/
 │   ├── components/
 │   │   ├── drafts/DraftResumeModal.tsx  # Draft Resume Modal
 │   │   ├── form/DynamicSurveyForm.tsx   # Multi-Step Inspection Wizard & Debounced Auto-Save
-│   │   └── layout/                      # Header (PWA Install), Status Ribbon, BottomNav
+│   │   ├── layout/                      # Header (PWA Install), Status Ribbon, BottomNav
+│   │   └── questions/                   # QuestionRenderer (Photo, GPS Location, Rating...)
 │   ├── db/
 │   │   ├── indexedDB.ts             # IDB Schema (surveys, questions, responses, syncQueue, drafts)
-│   │   └── seedData.ts              # VKU Campus Facility & Lifestyle seed definitions
+│   │   └── seedData.ts              # VKU Campus Facility (with GPS & Camera) & Lifestyle seeds
 │   ├── services/
 │   │   ├── cameraService.ts         # Dual-Engine Camera (Capacitor Native + Web HTML5)
+│   │   ├── locationService.ts       # Capacitor Native GPS Geolocation with Web Fallback
+│   │   ├── notificationService.ts   # Capacitor Local Notifications for Sync-Success Alerts
 │   │   ├── networkService.ts        # Unified Network Listener (Capacitor + Browser)
-│   │   ├── syncManager.ts           # Offline Queue Processor & Backoff Retry Engine
+│   │   ├── syncManager.ts           # Offline Queue Processor, Backoff Retry & Notifications
 │   │   └── googleSheetsApi.ts       # Cloud Sync Dispatcher
 │   └── pages/                       # SurveysList, SurveyFill, Responses, Builder, Config
 └── capacitor.config.ts              # Capacitor Project Configuration

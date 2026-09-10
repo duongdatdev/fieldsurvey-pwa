@@ -337,23 +337,27 @@ The application provides dual-target support: **Browser PWA** and **Native Andro
                       │
        ┌──────────────┴──────────────┐
        ▼                             ▼
-  Web Browser (PWA)           Native Android
- (HTML File Input)         (@capacitor/camera)
-  (window.online)         (@capacitor/network)
-       │                             │
-       └──────────────┬──────────────┘
-                      ▼
-         Unified Platform Services
-       (cameraService, networkService)
-                      │
-                      ▼
-                 SyncManager
+  Web Browser (PWA)               Native Android
+ (HTML File Input)             (@capacitor/camera)
+(navigator.geolocation)     (@capacitor/geolocation)
+ (Web Notifications)       (@capacitor/local-notifications)
+  (window.online)             (@capacitor/network)
+        │                             │
+        └──────────────┬──────────────┘
+                       ▼
+          Unified Platform Services
+   (camera, location, notification, network)
+                       │
+                       ▼
+                  SyncManager
 ```
 
 - **App Package ID:** `com.vku.fieldsurvey`
 - **App Name:** `FieldSurvey PWA`
 - **Native Plugins:**
   - `@capacitor/camera`: Platform-aware camera capture (prompts Camera or Gallery on Android; native file input on web).
+  - `@capacitor/geolocation`: Native GPS hardware coordinates acquisition for field inspection geofencing and audit trails.
+  - `@capacitor/local-notifications`: Push/local notifications triggered upon successful background synchronization to Cloud Sheets.
   - `@capacitor/network`: Native connection listener feeding into the unified `SyncManager`.
 
 ### Building the Android APK:

@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { Question } from '../../types/survey';
-import { Camera, Check, Star, X, Image as ImageIcon } from 'lucide-react';
+import { Camera, Check, Star, X, Image as ImageIcon, MapPin, RefreshCw } from 'lucide-react';
 import { compressImage } from '../../utils/imageCompression';
 import { cameraService } from '../../services/cameraService';
+import { locationService } from '../../services/locationService';
 
 interface QuestionRendererProps {
   question: Question;
@@ -19,6 +20,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [compressing, setCompressing] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
 
   // Platform-aware photo capture trigger (Capacitor Native vs Web file input)
   const handleInitiatePhotoCapture = async () => {
@@ -61,6 +63,23 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     onChange(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  // Acquire device GPS location using @capacitor/geolocation (with browser fallback)
+  const handleGetLocation = async () => {
+    try {
+      setGettingLocation(true);
+      const loc = await locationService.getCurrentLocation();
+      if (loc) {
+        onChange(loc);
+      } else {
+        alert('Could not acquire GPS position. Please make sure location services are enabled.');
+      }
+    } catch (err: any) {
+      alert('Failed to retrieve location: ' + (err.message || String(err)));
+    } finally {
+      setGettingLocation(false);
     }
   };
 
@@ -352,6 +371,122 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             )}
           </div>
         );
+
+      case 'location': {
+        const loc = typeof value === 'object' && value !== null ? value : null;
+        return (
+          <div>
+            {!loc ? (
+              <button
+                type="button"
+                onClick={handleGetLocation}
+                disabled={gettingLocation}
+                className="btn btn-secondary"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  padding: '16px',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 600,
+                  cursor: gettingLocation ? 'wait' : 'pointer',
+                  border: '1.5px dashed var(--border-strong)',
+                  backgroundColor: 'var(--bg-surface-muted)',
+                }}
+              >
+                <MapPin size={22} style={{ color: 'var(--accent-primary)' }} />
+                <span>
+                  {gettingLocation ? 'Acquiring GPS fix (Capacitor Geolocation)...' : 'Record Current GPS Coordinates'}
+                </span>
+              </button>
+            ) : (
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-surface-muted)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '14px 16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: 'var(--accent-primary)', fontSize: '0.9rem' }}>
+                    <MapPin size={18} />
+                    <span>GPS Coordinates Captured</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGetLocation}
+                    disabled={gettingLocation}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.8rem',
+                    }}
+                    title="Refresh GPS location"
+                  >
+                    <RefreshCw size={14} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '8px',
+                    fontSize: '0.85rem',
+                    fontFamily: 'monospace',
+                    backgroundColor: 'var(--bg-surface)',
+                    padding: '10px 12px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-subtle)',
+                  }}
+                >
+                  <div>Lat: <strong>{loc.latitude}</strong></div>
+                  <div>Lng: <strong>{loc.longitude}</strong></div>
+                  {loc.accuracy !== undefined && <div>Accuracy: <strong>±{loc.accuracy}m</strong></div>}
+                  <div>Status: <strong style={{ color: 'var(--accent-primary)' }}>Native Fix</strong></div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px' }}>
+                  <a
+                    href={`https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}
+                  >
+                    View on Google Maps ↗
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => onChange(null)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--status-offline)',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Remove Location
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
 
       default:
         return <div>Unsupported question type: {question.type}</div>;

@@ -32,6 +32,15 @@ export const responseService = {
     const responseId = generateUUID();
     const queueItemId = generateUUID();
 
+    // Extract location coordinates if present in answers
+    let detectedLocation = undefined;
+    for (const val of Object.values(answers)) {
+      if (val && typeof val === 'object' && typeof val.latitude === 'number' && typeof val.longitude === 'number') {
+        detectedLocation = val;
+        break;
+      }
+    }
+
     const response: SurveyResponse = {
       id: responseId,
       surveyId,
@@ -40,6 +49,7 @@ export const responseService = {
       updatedAt: now,
       status: 'pending',
       retryCount: 0,
+      location: detectedLocation,
     };
 
     const queueItem: SyncQueueItem = {

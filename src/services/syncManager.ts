@@ -2,6 +2,7 @@ import { syncQueueRepository } from '../db/repositories/syncQueueRepository';
 import { responseRepository } from '../db/repositories/responseRepository';
 import { googleSheetsApi } from './googleSheetsApi';
 import { SyncState } from '../components/layout/NetworkStatusBar';
+import { notificationService } from './notificationService';
 
 export interface SyncProgressEvent {
   total: number;
@@ -152,6 +153,10 @@ class SyncManager {
         this.notify('pending');
       } else {
         this.notify('synced');
+      }
+
+      if (syncedCount > 0) {
+        notificationService.notifySyncSuccess(syncedCount);
       }
     }
 

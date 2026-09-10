@@ -173,4 +173,12 @@ export const SEED_QUESTIONS: Question[] = [
     type: 'photo',
     required: false,
   },
+  {
+    id: 'q-fac-8',
+    surveyId: 'survey-campus-facility-inspection',
+    order: 8,
+    question: 'GPS Inspection Coordinates',
+    type: 'location',
+    required: false,
+  },
 ];

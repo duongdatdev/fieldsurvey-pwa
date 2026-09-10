@@ -23,6 +23,7 @@ const QUESTION_TYPES: { type: QuestionType; label: string }[] = [
   { type: 'date', label: 'Date' },
   { type: 'time', label: 'Time' },
   { type: 'photo', label: 'Photo Upload' },
+  { type: 'location', label: 'GPS Location' },
 ];
 
 interface SurveyBuilderPageProps {

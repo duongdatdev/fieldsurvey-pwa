@@ -10,7 +10,16 @@ export type QuestionType =
   | 'rating'
   | 'date'
   | 'time'
-  | 'photo';
+  | 'photo'
+  | 'location';
+
+export interface LocationCoordinate {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  altitude?: number | null;
+  timestamp?: number | string;
+}
 
 export interface Question {
   id: string;
@@ -56,6 +65,7 @@ export interface SurveyResponse {
   retryCount: number;
   syncedAt?: string;
   lastError?: string;
+  location?: LocationCoordinate;
 }
 
 export type QueueOperation = 'create' | 'update';

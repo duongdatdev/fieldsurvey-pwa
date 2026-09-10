@@ -2,7 +2,7 @@
 **Course:** Cross-Platform Mobile App Development (VKU)
 **Mini-Project Title:** Mini-Project 1: VKU Field Survey — Offline Data Collection (PWA & Capacitor)
 **Team / Student Name:** Dương Bảo Đạt
-**Submission Date:** 03/09/2026
+**Submission Date:** 10/09/2026
 
 ---
 
@@ -11,7 +11,7 @@
   1. Dương Bảo Đạt — Student ID: [23IT046] — Role: Full-Stack Architecture, PWA, Capacitor Native & Cloud Integration — Contribution: [100%]
 * **🔗 Live Demo URL:** https://fieldsurvey-pwa.pages.dev
 * **💻 GitHub Repository:** https://github.com/duongdatdev/fieldsurvey-pwa
-* **🎥 Link APK:** [https://github.com/duongdatdev/fieldsurvey-pwa/releases]
+* **🎥 Link APK Release:** https://github.com/duongdatdev/fieldsurvey-pwa/releases/tag/v1.1.0
 
 ---
 
@@ -19,7 +19,7 @@
 | # | Required Feature | Status | Implementation Details & Acceptance Level |
 |:---:|---|:---:|---|
 | 1 | PWA Standalone Installation | ✅ Complete | Valid `manifest.json` configured with `display: standalone`, theme color `#0284c7`, background `#0f172a`, responsive icons (192x192, 512x512). Service Worker (`sw.js`) caches App Shell assets using a Cache-First strategy for sub-second offline boot. |
-| 2 | Offline Form & Local Draft Persistence | ✅ Complete | Multi-step inspection form with 7 VKU fields (Building, Floor, Room #, Category, 1-5 Star Rating, Defect Notes, Camera Photo Evidence). Real-time persistence into IndexedDB (`drafts`) via `idb` on every input change (debounced 400ms) to prevent data loss on browser refresh. |
+| 2 | Offline Form & Local Draft Persistence | ✅ Complete | Multi-step inspection form with 8 VKU fields (Building, Floor, Room #, Category, 1-5 Star Rating, Defect Notes, Camera Photo Evidence, GPS Inspection Coordinates). Real-time persistence into IndexedDB (`drafts`) via `idb` on every input change (debounced 400ms) to prevent data loss on browser refresh. |
 | 3 | Offline Queue & Background Sync | ✅ Complete | Offline submissions are stamped with UUIDv4, ISO timestamp, and saved as `PENDING_SYNC` in IndexedDB store `syncQueue`. Listens to `window.ononline`, Capacitor Network status, and Background Sync API to automatically dispatch queued surveys sequentially upon network restoration to Google Sheets. |
 | 4 | Capacitor Native APK & Hardware Plugins | ✅ Complete | Integrated `@capacitor/camera` for native photo capture, `@capacitor/geolocation` for device GPS coordinates capture, `@capacitor/local-notifications` for sync-success push alerts, and `@capacitor/network` for connection monitoring. Packaged and verified as an installable Android APK (`com.vku.fieldsurvey`, binary at `android/app/build/outputs/apk/debug/app-debug.apk`). |
 
@@ -73,7 +73,7 @@ survey-pwa/
 1. **Sub-second Offline Boot:** Verified in browser with network set to Offline. Service Worker serves App Shell instantly from Cache Storage.
 2. **Local Draft Persistence:** Form fields remain intact after accidental page refresh; user can seamlessly resume in-progress audit.
 3. **Offline Queue & Background Sync:** Responses submitted without internet connection receive `PENDING_SYNC` status and automatically sync to Google Sheets once connection is restored.
-4. **Capacitor Native Android App:** Verified on Android device/emulator with native camera permissions and hardware network detection.
+4. **Capacitor Native Android App & Hardware Access:** Verified on Android device/emulator with native camera capture (`@capacitor/camera`), real-time GPS coordinates acquisition (`@capacitor/geolocation`), and native sync-success notifications (`@capacitor/local-notifications`).
 
 ---
 
@@ -87,3 +87,7 @@ survey-pwa/
 2. **Challenge 2: High-Resolution Camera Photo Storage & Transmission**
    * *Issue:* Uncompressed camera photos (4–12 MB) rapidly exceed IndexedDB quotas and cause HTTP payload timeouts when syncing over slow networks.
    * *Resolution:* Created an on-device canvas compression utility that scales photos to $\le 1200\text{px}$ at 70% JPEG quality before saving to IndexedDB, and configured the Google Apps Script backend to handle photo uploads efficiently.
+
+3. **Challenge 3: Native Hardware Permissions & Offline Sync Notifications**
+   * *Issue:* Background synchronization previously occurred silently within the WebView, leaving field investigators uncertain whether their offline submissions had reached Google Sheets after connectivity recovery. Furthermore, GPS tracking required strict runtime permission handling across Android 13/14/15.
+   * *Resolution:* Integrated `@capacitor/geolocation` with fallback to HTML5 Geolocation, configured `ACCESS_FINE_LOCATION` / `POST_NOTIFICATIONS` in `AndroidManifest.xml`, and scheduled immediate native device notifications via `@capacitor/local-notifications` whenever the sync engine drains pending records to the cloud.
